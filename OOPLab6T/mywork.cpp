@@ -1,267 +1,302 @@
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <cstdlib>
+#include <ctime>
+
 using namespace std;
 
-//////////////////////////////////////////////////////////////
-// 🔹 ЗАВДАННЯ 1
-// Віртуальне та невіртуальне успадкування
-//////////////////////////////////////////////////////////////
+/* ============================
+   ЗАВДАННЯ 1
+   ============================ */
 
-class Base {
-protected:
+   // Без віртуального успадкування
+class A {
+public:
+    int a;
+    A() { a = 1; cout << "A created\n"; }
+    ~A() { cout << "A destroyed\n"; }
+};
+
+class B : public A {
+public:
+    int b;
+    B() { b = 2; cout << "B created\n"; }
+    ~B() { cout << "B destroyed\n"; }
+};
+
+class C : public A {
+public:
+    int c;
+    C() { c = 3; cout << "C created\n"; }
+    ~C() { cout << "C destroyed\n"; }
+};
+
+class D : public B, public C {
+public:
+    int d;
+    D() { d = 4; cout << "D created\n"; }
+    ~D() { cout << "D destroyed\n"; }
+};
+
+// З віртуальним успадкуванням
+class Av {
+public:
+    int a;
+    Av() { a = 10; cout << "Av created\n"; }
+    ~Av() { cout << "Av destroyed\n"; }
+};
+
+class Bv : virtual public Av {
+public:
+    int b;
+    Bv() { b = 20; cout << "Bv created\n"; }
+    ~Bv() { cout << "Bv destroyed\n"; }
+};
+
+class Cv : virtual public Av {
+public:
+    int c;
+    Cv() { c = 30; cout << "Cv created\n"; }
+    ~Cv() { cout << "Cv destroyed\n"; }
+};
+
+class Dv : public Bv, public Cv {
+public:
+    int d;
+    Dv() { d = 40; cout << "Dv created\n"; }
+    ~Dv() { cout << "Dv destroyed\n"; }
+};
+
+/* ============================
+   ЗАВДАННЯ 2
+   ============================ */
+
+   // Абстрактний клас
+class Data {
+public:
+    virtual void display() = 0;
+    virtual void save(ofstream& out) = 0;
+    virtual void process() = 0;
+    virtual ~Data() {
+        cout << "Data destroyed\n";
+    }
+};
+
+// Сигнал
+class SignalData : public Data {
     int value;
 public:
-    Base(int v = 0) : value(v) {
-        cout << "Base constructor\n";
+    SignalData(int v = 0) : value(v) {
+        cout << "SignalData created\n";
     }
 
-    virtual void show() {
-        cout << "Base value: " << value << endl;
+    void display() override {
+        cout << "Signal: " << value << endl;
     }
 
-    virtual ~Base() {
-        cout << "Base destructor\n";
+    void save(ofstream& out) override {
+        out << "Signal: " << value << endl;
+    }
+
+    void process() override {
+        value *= 2;
+    }
+
+    ~SignalData() {
+        cout << "SignalData destroyed\n";
     }
 };
 
-// ВІРТУАЛЬНЕ УСПАДКУВАННЯ
-class Derived1 : virtual public Base {
-protected:
-    int d1;
+// Результат
+class ResultData : public Data {
+    double result;
 public:
-    Derived1(int v, int d) : Base(v), d1(d) {
-        cout << "Derived1 constructor\n";
+    ResultData(double r = 0) : result(r) {
+        cout << "ResultData created\n";
     }
 
-    void show() override {
-        cout << "Derived1: " << value << ", " << d1 << endl;
+    void display() override {
+        cout << "Result: " << result << endl;
     }
 
-    virtual ~Derived1() {
-        cout << "Derived1 destructor\n";
+    void save(ofstream& out) override {
+        out << "Result: " << result << endl;
+    }
+
+    void process() override {
+        result += 100;
+    }
+
+    ~ResultData() {
+        cout << "ResultData destroyed\n";
     }
 };
 
-class Derived2 : virtual public Base {
-protected:
-    int d2;
+// Допоміжні дані
+class HelperData : public Data {
+    string text;
 public:
-    Derived2(int v, int d) : Base(v), d2(d) {
-        cout << "Derived2 constructor\n";
+    HelperData(string t = "") : text(t) {
+        cout << "HelperData created\n";
     }
 
-    void show() override {
-        cout << "Derived2: " << value << ", " << d2 << endl;
+    void display() override {
+        cout << "Helper: " << text << endl;
     }
 
-    virtual ~Derived2() {
-        cout << "Derived2 destructor\n";
-    }
-};
-
-class FinalVirtual : public Derived1, public Derived2 {
-    int f;
-public:
-    FinalVirtual(int v, int d1, int d2, int f)
-        : Base(v), Derived1(v, d1), Derived2(v, d2), f(f) {
-        cout << "FinalVirtual constructor\n";
+    void save(ofstream& out) override {
+        out << "Helper: " << text << endl;
     }
 
-    void show() override {
-        cout << "FinalVirtual: " << value << ", " << d1 << ", " << d2 << ", " << f << endl;
+    void process() override {
+        text += "_processed";
     }
 
-    ~FinalVirtual() {
-        cout << "FinalVirtual destructor\n";
+    ~HelperData() {
+        cout << "HelperData destroyed\n";
     }
 };
 
-// БЕЗ ВІРТУАЛЬНОГО УСПАДКУВАННЯ
-class Base2 {
-public:
-    int value;
-};
+/* ============================
+   ЗАВДАННЯ 3
+   ============================ */
 
-class Derived1_2 : public Base2 {
-public:
-    int d1;
-};
-
-class Derived2_2 : public Base2 {
-public:
-    int d2;
-};
-
-class FinalNonVirtual : public Derived1_2, public Derived2_2 {
-public:
-    int f;
-};
-
-//////////////////////////////////////////////////////////////
-// 🔹 ЗАВДАННЯ 2
-// Абстрактний клас
-//////////////////////////////////////////////////////////////
-
-class Quadrilateral {
-public:
-    virtual double area() = 0;
-    virtual double perimeter() = 0;
-    virtual void info() = 0;
-    virtual ~Quadrilateral() {}
-};
-
-class Square : public Quadrilateral {
-    double a;
-public:
-    Square(double a) : a(a) {}
-
-    double area() override { return a * a; }
-    double perimeter() override { return 4 * a; }
-
-    void info() override {
-        cout << "Square side=" << a << endl;
-    }
-};
-
-class Rectangle : public Quadrilateral {
-    double a, b;
-public:
-    Rectangle(double a, double b) : a(a), b(b) {}
-
-    double area() override { return a * b; }
-    double perimeter() override { return 2 * (a + b); }
-
-    void info() override {
-        cout << "Rectangle sides=" << a << "," << b << endl;
-    }
-};
-
-class Parallelogram : public Quadrilateral {
-    double a, b, h;
-public:
-    Parallelogram(double a, double b, double h)
-        : a(a), b(b), h(h) {
-    }
-
-    double area() override { return a * h; }
-    double perimeter() override { return 2 * (a + b); }
-
-    void info() override {
-        cout << "Parallelogram: a=" << a << " b=" << b << " h=" << h << endl;
-    }
-};
-
-class Trapezoid : public Quadrilateral {
-    double a, b, c, d, h;
-public:
-    Trapezoid(double a, double b, double c, double d, double h)
-        : a(a), b(b), c(c), d(d), h(h) {
-    }
-
-    double area() override { return (a + b) / 2 * h; }
-    double perimeter() override { return a + b + c + d; }
-
-    void info() override {
-        cout << "Trapezoid: bases=" << a << "," << b << endl;
-    }
-};
-
-//////////////////////////////////////////////////////////////
-// 🔹 ЗАВДАННЯ 3
-// Множинне наслідування
-//////////////////////////////////////////////////////////////
-
-class Human {
+class Person {
 protected:
     string name;
 public:
-    Human(string name = "Unknown") : name(name) {}
+    Person(string n = "Unknown") : name(n) {
+        cout << "Person created\n";
+    }
+    virtual ~Person() {
+        cout << "Person destroyed\n";
+    }
 
     virtual void show() {
-        cout << "Human: " << name << endl;
+        cout << "Name: " << name << endl;
     }
-
-    virtual ~Human() {}
 };
 
-class Father : virtual public Human {
+class Student : virtual public Person {
 protected:
-    int age_f;
+    int course;
 public:
-    Father(string name, int age) : Human(name), age_f(age) {}
+    Student(string n = "", int c = 1) : Person(n), course(c) {
+        cout << "Student created\n";
+    }
 
     void show() override {
-        cout << "Father: " << name << " age=" << age_f << endl;
+        cout << "Student: " << name << ", course: " << course << endl;
+    }
+
+    ~Student() {
+        cout << "Student destroyed\n";
     }
 };
 
-class Mother : virtual public Human {
+class Father : virtual public Person {
 protected:
-    int age_m;
+    int children;
 public:
-    Mother(string name, int age) : Human(name), age_m(age) {}
-
-    void show() override {
-        cout << "Mother: " << name << " age=" << age_m << endl;
-    }
-};
-
-class Son : public Father, public Mother {
-    int age_s;
-public:
-    Son(string name, int af, int am, int as)
-        : Human(name), Father(name, af), Mother(name, am), age_s(as) {
+    Father(string n = "", int ch = 0) : Person(n), children(ch) {
+        cout << "Father created\n";
     }
 
     void show() override {
-        cout << "Son: " << name << " age=" << age_s << endl;
-        cout << "Father age=" << age_f << endl;
-        cout << "Mother age=" << age_m << endl;
+        cout << "Father: " << name << ", children: " << children << endl;
+    }
+
+    ~Father() {
+        cout << "Father destroyed\n";
     }
 };
 
-//////////////////////////////////////////////////////////////
-// 🔹 MAIN
-//////////////////////////////////////////////////////////////
+class StudentFather : public Student, public Father {
+public:
+    StudentFather(string n, int c, int ch)
+        : Person(n), Student(n, c), Father(n, ch) {
+        cout << "StudentFather created\n";
+    }
+
+    void show() override {
+        cout << "Student-Father: " << name
+            << ", course: " << course
+            << ", children: " << children << endl;
+    }
+
+    ~StudentFather() {
+        cout << "StudentFather destroyed\n";
+    }
+};
+
+/* ============================
+   ТЕСТИ + ВВЕДЕННЯ
+   ============================ */
+
+void testTask1() {
+    cout << "\n--- Task 1 ---\n";
+
+    D obj1;
+    Dv obj2;
+
+    cout << "Size without virtual: " << sizeof(obj1) << endl;
+    cout << "Size with virtual: " << sizeof(obj2) << endl;
+}
+
+void testTask2() {
+    cout << "\n--- Task 2 ---\n";
+
+    srand(time(0));
+
+    Data* arr[3];
+
+    // випадкові дані
+    arr[0] = new SignalData(rand() % 100);
+    arr[1] = new ResultData(rand() % 100);
+    arr[2] = new HelperData("test");
+
+    ofstream file("data.txt");
+
+    for (int i = 0; i < 3; i++) {
+        arr[i]->process();
+        arr[i]->display();
+        arr[i]->save(file);
+    }
+
+    file.close();
+
+    for (int i = 0; i < 3; i++) {
+        delete arr[i];
+    }
+}
+
+void testTask3() {
+    cout << "\n--- Task 3 ---\n";
+
+    string name;
+    int course, children;
+
+    cout << "Enter name: ";
+    cin >> name;
+    cout << "Enter course: ";
+    cin >> course;
+    cout << "Enter children: ";
+    cin >> children;
+
+    StudentFather obj(name, course, children);
+    obj.show();
+}
+
+/* ============================
+   MAIN
+   ============================ */
 
 int main() {
 
-    cout << "===== TASK 1 =====\n";
-    FinalVirtual obj(10, 20, 30, 40);
-    obj.show();
-
-    cout << "\nSizes (virtual):\n";
-    cout << sizeof(Base) << endl;
-    cout << sizeof(Derived1) << endl;
-    cout << sizeof(Derived2) << endl;
-    cout << sizeof(FinalVirtual) << endl;
-
-    cout << "\nSizes (non-virtual):\n";
-    cout << sizeof(Base2) << endl;
-    cout << sizeof(Derived1_2) << endl;
-    cout << sizeof(Derived2_2) << endl;
-    cout << sizeof(FinalNonVirtual) << endl;
-
-    cout << "\n===== TASK 2 =====\n";
-    Quadrilateral* arr[4];
-
-    arr[0] = new Square(5);
-    arr[1] = new Rectangle(4, 6);
-    arr[2] = new Parallelogram(5, 3, 4);
-    arr[3] = new Trapezoid(3, 5, 4, 4, 2);
-
-    for (int i = 0; i < 4; i++) {
-        arr[i]->info();
-        cout << "Area=" << arr[i]->area() << endl;
-        cout << "Perimeter=" << arr[i]->perimeter() << endl;
-        cout << "------\n";
-    }
-
-    for (int i = 0; i < 4; i++) delete arr[i];
-
-    cout << "\n===== TASK 3 =====\n";
-    Son s("Ivan", 45, 43, 20);
-    s.show();
+    testTask1();
+    testTask2();
+    testTask3();
 
     return 0;
 }
